@@ -71,7 +71,7 @@ internal class BooksStorage : StorageBase, IBooksStorage
 
     public List<Book> GetBooks(bool origin = false) => origin ? books : books.ToList();
 
-    public Book CreateBook(string title, string author, uint numberOfPages)
+    public Book CreateBook(string title, string author, int numberOfPages)
     {
         return new Book()
         {
@@ -129,7 +129,7 @@ internal class BooksStorage : StorageBase, IBooksStorage
 
     public void Sort()
     {
-        books = books.OrderBy(b => b.Author).ThenBy(b => b.Author).ToList();
+        books = books.OrderBy(b => b.Author).ThenBy(b => b.Title).ToList();
     }
 
     public List<Book> SearchBy(string query, SearchPart searchPart)

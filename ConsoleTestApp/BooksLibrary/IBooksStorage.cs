@@ -17,7 +17,7 @@ public interface IBooksStorage
     Task SaveToXmlAsync(string filePath = null);
 
     List<Book> GetBooks(bool origin = false);
-    Book CreateBook(string title, string author, uint numberOfPages);
+    Book CreateBook(string title, string author, int numberOfPages);
     int Count();
 
     void Add(Book book);
