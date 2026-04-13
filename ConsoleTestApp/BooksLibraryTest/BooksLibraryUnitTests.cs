@@ -15,7 +15,7 @@ public class BooksLibraryUnitTests
     [Fact]
     public void Sort_MultipleBooks_SortedByAuthorThenByTitle()
     {
-        IBooksStorage storage = BooksStorageFactory.GetBooksStorage();
+        IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
         storage.Add(storage.CreateBook("Title_2", "Author_1", 100));
         storage.Add(storage.CreateBook("Title_1", "Author_2", 100));
@@ -51,7 +51,7 @@ public class BooksLibraryUnitTests
     [Fact]
     public void SearchBy_Title_ReturnFoundResult()
     {
-        IBooksStorage storage = BooksStorageFactory.GetBooksStorage();
+        IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
         storage.AddRange(new List<Book>()
         {
@@ -67,7 +67,7 @@ public class BooksLibraryUnitTests
     [Fact]
     public void SearchBy_Title_ReturnEmptyResult()
     {
-        IBooksStorage storage = BooksStorageFactory.GetBooksStorage();
+        IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
         storage.AddRange(new List<Book>()
         {
@@ -82,7 +82,7 @@ public class BooksLibraryUnitTests
     [Fact]
     public void SearchBy_EmptyTitle_ReturnEmptyResult()
     {
-        IBooksStorage storage = BooksStorageFactory.GetBooksStorage();
+        IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
         storage.Add(GetTestBook());
         List<Book> result = storage.SearchBy(string.Empty, SearchPart.Title);
@@ -93,7 +93,7 @@ public class BooksLibraryUnitTests
     [Fact]
     public void SearchBy_IsCaseInsensitive_ReturnFoundResult()
     {
-        IBooksStorage storage = BooksStorageFactory.GetBooksStorage();
+        IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
         storage.Add(GetTestBook());
         List<Book> result = storage.SearchBy("ITLE", SearchPart.Title);

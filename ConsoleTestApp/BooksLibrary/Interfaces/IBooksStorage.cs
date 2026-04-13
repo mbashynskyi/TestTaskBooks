@@ -14,11 +14,11 @@ public enum SearchPart
 
 public interface IBooksStorage
 {
-    void LoadFromXml(string filePath);
-    Task LoadFromXmlAsync(string filePath);
+    void Load(string filePath);
+    Task LoadAsync(string filePath);
 
-    void SaveToXml(string filePath = null);
-    Task SaveToXmlAsync(string filePath = null);
+    void Save(string filePath = null);
+    Task SaveAsync(string filePath = null);
 
     List<Book> GetBooks(bool origin = false);
     Book CreateBook(string title, string author, int numberOfPages);

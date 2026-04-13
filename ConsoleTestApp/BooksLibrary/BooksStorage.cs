@@ -5,14 +5,21 @@ namespace BooksLibrary;
 
 internal class StorageBase
 {
+    private readonly IDataParser dataParser;
     private string filePath = string.Empty;
 
 
-    public StorageBase()
+    public StorageBase(IDataParser dataParser)
     {
-        filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Concat(Guid.NewGuid().ToString(), ".xml"));
+        this.dataParser = dataParser;
+
+        filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Concat(Guid.NewGuid().ToString(), dataParser.GetExtension()));
     }
 
+
+    protected List<Book> GetBooksFromString(string data) => dataParser.StringToObject(data);
+
+    protected string GetStringFromBooks(List<Book> booksList) => dataParser.ObjectToString(booksList);
 
     protected void SetActualFilePath(string path)
     {
@@ -20,6 +27,31 @@ internal class StorageBase
     }
 
     protected string GetActualFilePath(string path = null) => !string.IsNullOrEmpty(path) ? path : filePath;
+
+    protected List<Book> LoadBase(string filePath)
+    {
+        SetActualFilePath(filePath);
+
+        return GetBooksFromString(FileHelper.ReadFile(GetActualFilePath(filePath)));
+    }
+
+    protected async Task<List<Book>> LoadBaseAsync(string filePath)
+    {
+        SetActualFilePath(filePath);
+
+        return GetBooksFromString(await FileHelper.ReadFileAsync(GetActualFilePath(filePath)));
+    }
+
+    public void SaveBase(List<Book> books, string filePath = null)
+    {
+        FileHelper.WriteFile(GetActualFilePath(filePath), GetStringFromBooks(books));
+    }
+
+    public async Task SaveBaseAsync(List<Book> books, string filePath = null)
+    {
+        await FileHelper.WriteFileAsync(GetActualFilePath(filePath), GetStringFromBooks(books));
+    }
+
 }
 
 internal class BooksStorage : StorageBase, IBooksStorage
@@ -27,44 +59,31 @@ internal class BooksStorage : StorageBase, IBooksStorage
     private List<Book> books = new();
 
 
-    public BooksStorage()
+    public BooksStorage(IDataParser dataParser)
+        : base(dataParser)
     {
     }
 
 
-    private void GetBooksFromString(string xmlData)
+    #region Load/Save
+    public void Load(string filePath)
     {
-        books = XmlHelper.StringToObject<List<Book>>(xmlData);
+        books = LoadBase(filePath);
     }
 
-    private string GetStringFromBooks(List<Book> booksList)
+    public async Task LoadAsync(string filePath)
     {
-        return XmlHelper.ObjectToString<List<Book>>(booksList);
+        books = await LoadBaseAsync(filePath);
     }
 
-    #region Load
-    public void LoadFromXml(string filePath)
+    public void Save(string filePath = null)
     {
-        SetActualFilePath(filePath);
-        GetBooksFromString(FileHelper.ReadFile(GetActualFilePath(filePath)));
+        SaveBase(GetBooks(true), filePath);
     }
 
-    public async Task LoadFromXmlAsync(string filePath)
+    public async Task SaveAsync(string filePath = null)
     {
-        SetActualFilePath(filePath);
-        GetBooksFromString(await FileHelper.ReadFileAsync(GetActualFilePath(filePath)));
-    }
-    #endregion
-
-    #region Save
-    public void SaveToXml(string filePath = null)
-    {
-        FileHelper.WriteFile(GetActualFilePath(filePath), GetStringFromBooks(GetBooks()));
-    }
-
-    public async Task SaveToXmlAsync(string filePath = null)
-    {
-        await FileHelper.WriteFileAsync(GetActualFilePath(filePath), GetStringFromBooks(GetBooks()));
+        await SaveBaseAsync(GetBooks(true), filePath);
     }
     #endregion
 
@@ -85,13 +104,13 @@ internal class BooksStorage : StorageBase, IBooksStorage
     public int Count() => books.Count;
 
     #region Operations
-    // TODO: Avoid to add same object if a change to the logic is required.
+    // TODO: Avoid to add same object? Depends on usage.
     public void Add(Book book)
     {
         books.Add(book);
     }
 
-    // TODO: Avoid to add same objects if a change to the logic is required.
+    // TODO: Avoid to add same objects? Depends on usage.
     // Get unique from input list and in the same time that does not exists in actual list.
     public void AddRange(IEnumerable<Book> booksToAdd)
     {
