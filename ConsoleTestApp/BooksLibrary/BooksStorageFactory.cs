@@ -3,7 +3,7 @@ using System;
 
 namespace BooksLibrary;
 
-public class BooksStorageFactory
+public static class BooksStorageFactory
 {
-    public IBooksStorage GetBooksStorage() => new BooksStorage();
+    public static IBooksStorage GetBooksStorage() => new BooksStorage();
 }
