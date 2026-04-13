@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BooksLibrary.Utils;
+namespace BooksLibrary;
 
 internal class BookComparer : IEqualityComparer<Book>
 {
