@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace BooksLibrary;
+namespace BooksLibrary.Utils;
 
 internal static class FileHelper
 {

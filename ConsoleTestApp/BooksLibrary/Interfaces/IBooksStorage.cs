@@ -25,7 +25,7 @@ public interface IBooksStorage
     int Count();
 
     void Add(Book book);
-    void AddRange(IEnumerable<Book> booksToAdd);
+    void AddRange(List<Book> booksToAdd);
 
     bool Remove(Book book);
     bool RemoveAt(int index);

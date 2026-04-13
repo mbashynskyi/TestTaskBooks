@@ -1,5 +1,6 @@
 ﻿using System;
 using BooksLibrary.Interfaces;
+using BooksLibrary.Utils;
 
 namespace BooksLibrary;
 
@@ -8,12 +9,15 @@ internal class StorageBase
     private readonly IDataParser dataParser;
     private string filePath = string.Empty;
 
+    protected readonly BookComparer bookComparer;
+
 
     public StorageBase(IDataParser dataParser)
     {
         this.dataParser = dataParser;
 
         filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Concat(Guid.NewGuid().ToString(), dataParser.GetExtension()));
+        bookComparer = new BookComparer();
     }
 
 
@@ -109,17 +113,24 @@ internal class BooksStorage : StorageBase, IBooksStorage
     public int Count() => books.Count;
 
     #region Operations
-    // TODO: Avoid to add same object? Depends on usage.
     public void Add(Book book)
     {
-        books.Add(book);
+        if (book != null && !books.Contains(book, bookComparer))
+        {
+            books.Add(book);
+        }
     }
 
-    // TODO: Avoid to add same objects? Depends on usage.
-    // Get unique from input list and in the same time that does not exists in actual list.
-    public void AddRange(IEnumerable<Book> booksToAdd)
+    public void AddRange(List<Book> booksToAdd)
     {
-        books.AddRange(booksToAdd);
+        if (booksToAdd != null)
+        {
+            List<Book> unique = booksToAdd
+                .Where(b => b != null)
+                .Except(books, bookComparer)
+                .ToList();
+            books.AddRange(unique);
+        }
     }
 
     public bool Remove(Book book)
@@ -157,7 +168,10 @@ internal class BooksStorage : StorageBase, IBooksStorage
 
     public void Sort()
     {
-        books = books.OrderBy(b => b.Author).ThenBy(b => b.Title).ToList();
+        books = books
+            .OrderBy(b => b.Author)
+            .ThenBy(b => b.Title)
+            .ToList();
     }
 
     public List<Book> SearchBy(string query, SearchPart searchPart)
