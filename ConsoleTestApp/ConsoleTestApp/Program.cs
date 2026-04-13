@@ -13,9 +13,15 @@ namespace ConsoleTestApp
             
             IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
             storage.Load(path);
-            
+
+            Book book = storage.CreateBook("Title_1", "Author_1", 100);
+
             storage.AddRange(new List<Book>()
             {
+                book,
+                null,
+                null,
+                book,
                 storage.CreateBook("Title_1", "Author_1", 100),
                 storage.CreateBook("Title_2", "Author_1", 100),
                 storage.CreateBook("Title_1", "Author_3", 10),
