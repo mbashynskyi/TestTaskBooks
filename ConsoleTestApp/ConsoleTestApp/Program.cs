@@ -4,7 +4,12 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("App started");
+
+
+            Console.WriteLine("App completed");
+
+            Console.ReadLine();
         }
     }
 }
