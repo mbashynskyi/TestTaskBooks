@@ -85,11 +85,14 @@ internal class BooksStorage : StorageBase, IBooksStorage
     public int Count() => books.Count;
 
     #region Operations
+    // TODO: Avoid to add same object if a change to the logic is required.
     public void Add(Book book)
     {
         books.Add(book);
     }
 
+    // TODO: Avoid to add same objects if a change to the logic is required.
+    // Get unique from input list and in the same time that does not exists in actual list.
     public void AddRange(IEnumerable<Book> booksToAdd)
     {
         books.AddRange(booksToAdd);
