@@ -83,6 +83,8 @@ internal class BooksStorage : StorageBase, IBooksStorage
         };
     }
 
+    public int Count() => books.Count;
+
     #region Operations
     public void Add(Book book)
     {
@@ -126,6 +128,27 @@ internal class BooksStorage : StorageBase, IBooksStorage
             return false;
         }
     }
+
+    public void Sort()
+    {
+        books = books.OrderBy(b => b.Author).ThenBy(b => b.Author).ToList();
+    }
+
+    public List<Book> SearchBy(string query, SearchPart searchPart)
+    {
+        if (!string.IsNullOrEmpty(query))
+        {
+            return searchPart switch
+            {
+                SearchPart.Title => books.Where(b => b.Title?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false).ToList(),
+                SearchPart.Author => books.Where(b => b.Author?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false).ToList(),
+                _ => new()
+            };
+        }
+
+        return new();
+    }
+
     #endregion
 
 }
