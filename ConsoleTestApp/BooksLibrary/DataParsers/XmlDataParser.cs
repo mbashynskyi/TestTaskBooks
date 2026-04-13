@@ -9,9 +9,9 @@ namespace BooksLibrary.DataParsers;
 internal class XmlDataParser : IDataParser
 {
     private const string xmlExtension = ".xml";
-    private readonly XmlWriterSettings xmlSettings = new XmlWriterSettings { Indent = true };
+    private readonly XmlWriterSettings xmlSettings = new() { Indent = true, Encoding = Encoding.UTF8 };
 
-    private XmlSerializer GetXmlSerializer() => new XmlSerializer(typeof(List<Book>));
+    private XmlSerializer CreateSerializer() => new XmlSerializer(typeof(List<Book>));
 
     public string GetExtension() => xmlExtension;
 
@@ -24,7 +24,8 @@ internal class XmlDataParser : IDataParser
 
         try
         {
-            XmlSerializer xml = GetXmlSerializer();
+            XmlSerializer xml = CreateSerializer();
+
             using (TextReader reader = new StringReader(data))
             {
                 if (xml.Deserialize(reader) is List<Book> books)
@@ -48,16 +49,19 @@ internal class XmlDataParser : IDataParser
 
         try
         {
-            XmlSerializer xml = GetXmlSerializer();
-            var result = new StringBuilder();
-            using (var writer = XmlWriter.Create(result, xmlSettings))
-            {
-                xml.Serialize(writer, books);
-            }
+            XmlSerializer xml = CreateSerializer();
 
-            return result.ToString();
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = XmlWriter.Create(stream, xmlSettings))
+                {
+                    xml.Serialize(writer, books);
+
+                    return Encoding.UTF8.GetString(stream.ToArray());
+                }
+            }
         }
-        catch (Exception ex)
+        catch (Exception ex) // It was a conscious choice to use Exception and not the specific one (like InvalidOperationException)
         {
             // Add logs for futher investigation.
             // I would keep try/catch for scenario when we need to update Model (Book) and in the same time want to save the other logic.

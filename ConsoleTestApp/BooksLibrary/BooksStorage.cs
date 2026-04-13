@@ -24,6 +24,11 @@ internal class StorageBase
     protected void SetActualFilePath(string path)
     {
         filePath = !string.IsNullOrEmpty(path) ? path : filePath;
+
+        if (!File.Exists(filePath))
+        {
+            File.WriteAllText(filePath, string.Empty);
+        }
     }
 
     protected string GetActualFilePath(string path = null) => !string.IsNullOrEmpty(path) ? path : filePath;
