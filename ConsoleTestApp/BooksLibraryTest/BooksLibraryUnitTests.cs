@@ -6,11 +6,11 @@ namespace BooksLibraryTest;
 public class BooksLibraryUnitTests
 {
     // add/remove - ?
-    // XML serialize/deserialize
     // sort
     // search
+    // XML serialize/deserialize
 
-    private static Book GetTestBook() => new Book() { Title = "Title_1", Author = "Author_1", NumberOfPages = 100 };
+    private static Book CreateTestBook() => new Book() { Title = "Title_1", Author = "Author_1", NumberOfPages = 100 };
 
     [Fact]
     public void Sort_MultipleBooks_SortedByAuthorThenByTitle()
@@ -49,7 +49,7 @@ public class BooksLibraryUnitTests
     }
 
     [Fact]
-    public void SearchBy_Title_ReturnFoundResult()
+    public void SearchBy_Title_FoundResult()
     {
         IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
@@ -65,7 +65,7 @@ public class BooksLibraryUnitTests
     }
 
     [Fact]
-    public void SearchBy_Title_ReturnEmptyResult()
+    public void SearchBy_Title_EmptyResult()
     {
         IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
@@ -80,25 +80,79 @@ public class BooksLibraryUnitTests
     }
 
     [Fact]
-    public void SearchBy_EmptyTitle_ReturnEmptyResult()
+    public void SearchBy_EmptyTitle_EmptyResult()
     {
         IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
-        storage.Add(GetTestBook());
+        storage.Add(CreateTestBook());
         List<Book> result = storage.SearchBy(string.Empty, SearchPart.Title);
 
         Assert.Empty(result);
     }
 
     [Fact]
-    public void SearchBy_IsCaseInsensitive_ReturnFoundResult()
+    public void SearchBy_IsCaseInsensitive_FoundResult()
     {
         IBooksStorage storage = BooksStorageFactory.GetBooksStorage(BooksStorageFactory.GetXmlDataParser());
 
-        storage.Add(GetTestBook());
+        storage.Add(CreateTestBook());
         List<Book> result = storage.SearchBy("ITLE", SearchPart.Title);
 
         Assert.Single(result);
+    }
+
+    [Fact]
+    public void ParserDeserialize_ValidXml_FilledBooksList()
+    {
+        string xml = @"<ArrayOfBook>
+                        <Book>
+                            <Title>Title_1</Title>
+                            <Author>Author_1</Author>
+                            <NumberOfPages>100</NumberOfPages>
+                        </Book>
+                        <Book>
+                            <Title>Title_2</Title>
+                            <Author>Author_1</Author>
+                            <NumberOfPages>100</NumberOfPages>
+                        </Book>
+                    </ArrayOfBook>";
+
+        IDataParser dataParser = BooksStorageFactory.GetXmlDataParser();
+        List<Book> books = dataParser.StringToObject(xml);
+        
+        Assert.Equal(2, books.Count);
+    }
+
+    [Fact]
+    public void ParserDeserialize_InvalidXml_EmptyBooksList()
+    {
+        string xml = @"<ArrayOfB
+                        Book>
+                            <Title>Title_1</Title>
+                            <Author>Author_1</Author>
+                            <NumberOfPages>100</NumberOfPages>
+                        </Book>
+                    </ArrayOfBook";
+
+        IDataParser dataParser = BooksStorageFactory.GetXmlDataParser();
+        List<Book> books = dataParser.StringToObject(xml);
+
+        Assert.Empty(books);
+    }
+
+    [Fact]
+    public void ParserSerialize_Books_CreateValidXml()
+    {
+        IDataParser dataParser = BooksStorageFactory.GetXmlDataParser();
+        IBooksStorage storage = BooksStorageFactory.GetBooksStorage(dataParser);
+
+        storage.Add(CreateTestBook());
+        List<Book> result = storage.GetBooks();
+        string xml = dataParser.ObjectToString(result);
+
+        Assert.Contains("<Title>Title_1</Title>", xml);
+        Assert.Contains("<Author>Author_1</Author>", xml);
+        Assert.Contains("<NumberOfPages>100</NumberOfPages>", xml);
     }
 
 }
