@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using BooksLibrary.Interfaces;
 using BooksLibrary.Utils;
 
@@ -9,15 +10,12 @@ internal class StorageBase
     private readonly IDataParser dataParser;
     private string filePath = string.Empty;
 
-    protected readonly BookComparer bookComparer;
-
 
     public StorageBase(IDataParser dataParser)
     {
         this.dataParser = dataParser;
 
         filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Concat(Guid.NewGuid().ToString(), dataParser.GetExtension()));
-        bookComparer = new BookComparer();
     }
 
 
@@ -113,43 +111,69 @@ internal class BooksStorage : StorageBase, IBooksStorage
     public int Count() => books.Count;
 
     #region Operations
-    public void Add(Book book)
+    public bool Add(Book book)
     {
-        if (book != null && !books.Contains(book, bookComparer))
+        bool added = false;
+
+        if (book != null && !books.Any(b => string.Equals(b.Id, book.Id)))
         {
             books.Add(book);
+            added = true;
         }
+
+        Debug.WriteLine($"BooksStorage: Add(...) -> Item was {(added ? "Added" : "Skipped")}, Id = {book?.Id ?? "unset"}");
+
+        return added;
     }
 
-    public void AddRange(List<Book> booksToAdd)
+    public bool AddRange(List<Book> booksToAdd)
     {
+        int addedCount = 0;
+
         if (booksToAdd != null)
         {
-            List<Book> unique = booksToAdd
-                .Where(b => b != null)
-                .Except(books, bookComparer)
-                .ToList();
-            books.AddRange(unique);
+            foreach(Book item in booksToAdd)
+            {
+                if (Add(item))
+                    addedCount++;
+            }
         }
+
+        Debug.WriteLine($"BooksStorage: AddRange(...) -> Number of added = {addedCount}");
+
+        return addedCount > 0;
     }
 
     public bool Remove(Book book)
     {
-        return books.Remove(book);
+        int removedCount = 0;
+
+        if (book != null)
+        {
+            removedCount = books.RemoveAll(b => string.Equals(b.Id, book.Id));
+        }
+
+        Debug.WriteLine($"BooksStorage: Remove(...) -> Item was {(removedCount > 0 ? "Removed" : "Skipped")}, Id = {book?.Id ?? "unset"}");
+
+        return removedCount > 0;
     }
 
-    public bool RemoveAt(int index)
+    public bool RemoveRange(List<Book> booksToRemove)
     {
-        try
-        {
-            books.RemoveAt(index);
+        int removedCount = 0;
 
-            return true;
-        }
-        catch (ArgumentOutOfRangeException)
+        if (booksToRemove != null)
         {
-            return false;
+            foreach (Book item in booksToRemove)
+            {
+                if (Remove(item))
+                    removedCount++;
+            }
         }
+
+        Debug.WriteLine($"BooksStorage: RemoveRange(...) -> Number of removed = {removedCount}");
+
+        return removedCount > 0;
     }
 
     public bool RemoveRange(int index, int count)
@@ -157,6 +181,8 @@ internal class BooksStorage : StorageBase, IBooksStorage
         try
         {
             books.RemoveRange(index, count);
+
+            Debug.WriteLine($"BooksStorage: RemoveRange(...) -> Index = {index}, Count = {count}");
 
             return true;
         }

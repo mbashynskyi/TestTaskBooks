@@ -24,11 +24,11 @@ public interface IBooksStorage
     Book CreateBook(string title, string author, int numberOfPages);
     int Count();
 
-    void Add(Book book);
-    void AddRange(List<Book> booksToAdd);
+    bool Add(Book book);
+    bool AddRange(List<Book> booksToAdd);
 
     bool Remove(Book book);
-    bool RemoveAt(int index);
+    bool RemoveRange(List<Book> booksToRemove);
     bool RemoveRange(int index, int count);
 
     void Sort();

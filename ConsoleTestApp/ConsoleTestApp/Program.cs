@@ -38,7 +38,7 @@ namespace ConsoleTestApp
             List<Book> booksOrigin = storage.GetBooks(true);
 
             storage.Remove(booksCopy[0]);
-            storage.RemoveAt(storage.Count() - 1);
+            storage.RemoveRange( new List<Book>() { booksCopy[0], null, null });
             storage.RemoveRange(0, 2);
 
             storage.Save();
